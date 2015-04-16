@@ -184,6 +184,47 @@ void ctrl_Z(){
     fgPid = 0;
 }
 
+/*ctrl+c*/
+void ctrl_C(){
+	
+    Job *fgptr = NULL;
+	Job *p	=	NULL;
+	int temp_pid=fgPid;
+    
+    if(fgPid == 0){ 
+        return;
+    }
+
+	//打印提示信息
+    printf("[%d] is killed\n", fgPid);
+	
+	//发送SIGSTOP信号,killfg
+	
+    kill(fgPid, SIGSTOP);
+    fgPid = 0;
+    //SIGCHLD信号产生自ctrl+c
+    ingnore = 1;
+
+	if(head==NULL){
+		return;
+	}
+
+	p=head;
+	
+	if(head->pid==temp_pid){
+		head=NULL;
+		return;
+	}
+	fgptr = head->next;
+	while(fgptr != NULL && fgptr->pid != temp_pid)
+		fgptr = fgptr->next;
+
+    if(fgptr != NULL){ //找到前台作业，将前台作业从jobs中删除
+        p->next=fgptr->next;
+    }
+
+}
+
 /*fg命令*/
 void fg_exec(int pid){    
     Job *now = NULL; 
